@@ -94,9 +94,12 @@ const eventModel = ref({
 import { useTokenStore } from '@/stores/token.js';
 const tokenStore = useTokenStore();
 
+// 获取后端服务器地址（图片通过静态资源映射存储在后端服务器所在主机的某个文件夹中）
+const LOADIMAGE_BASE_URL = import.meta.env.VITE_LOADIMAGE_BASE_URL;
 //上传成功的回调函数
 const uploadSuccess = (result) => {
-    eventModel.value.coverImg = result.data;
+    eventModel.value.coverImg = LOADIMAGE_BASE_URL + result.data;
+    console.log(eventModel.value.coverImg)
     console.log(result.data);
 }
 

@@ -10,11 +10,13 @@ import useUserInfoStore from '@/stores/userInfo.js'
 const userInfoStore = useUserInfoStore();
 
 //用户头像地址
-const imgUrl= ref(userInfoStore.info.userPic)
+const imgUrl= ref(userInfoStore.info.userPicUrl)
 
+const LOADIMAGE_BASE_URL = import.meta.env.VITE_LOADIMAGE_BASE_URL;
 //图片上传成功的回调函数
 const uploadSuccess = (result)=>{
-    imgUrl.value = result.data;
+    // imgUrl.value = result.data;
+    imgUrl.value = LOADIMAGE_BASE_URL+result.data;
 }
 
 
@@ -24,6 +26,7 @@ import {ElMessage} from 'element-plus'
 //头像修改
 const updateAvatar = async ()=>{
     //调用接口
+        console.log(imgUrl.value);
     let result = await userAvatarUpdateService(imgUrl.value);
 
     ElMessage.success('修改成功')

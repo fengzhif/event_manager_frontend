@@ -122,12 +122,12 @@
             <el-container>
                 <!-- 头部区域 -->
                 <el-header>
-                    <div>黑马程序员：<strong>{{ userInfoStore.info.nickname }}</strong></div>
+                    <div>当前用户：<strong>{{ userInfoStore.info.nickname }}</strong></div>
                     <!-- 下拉菜单 -->
                     <!-- command: 条目被点击后会触发,在事件函数上可以声明一个参数,接收条目对应的指令 -->
                     <el-dropdown placement="bottom-end" @command="handleCommand">
                         <span class="el-dropdown__box">
-                            <el-avatar :src="userInfoStore.info.userPic? userInfoStore.info.userPic:avatar" />
+                            <el-avatar :src="userInfoStore.info.userPicUrl? userInfoStore.info.userPicUrl:avatar" />
                             <el-icon>
                                 <CaretBottom />
                             </el-icon>
@@ -150,7 +150,7 @@
                     <router-view></router-view>
                 </el-main>
                 <!-- 底部区域 -->
-                <el-footer>大事件 ©2023 Created by 黑马程序员</el-footer>
+                <el-footer>EventManager ©2025 Created by fengzhi</el-footer>
             </el-container>
         </el-container>
     </template>
