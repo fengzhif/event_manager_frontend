@@ -18,10 +18,17 @@ const state = ref('')
 //事件列表数据模型
 const events = ref([])
 
+//日期选择范围
+const startDate = ref('')
+const endDate = ref('')
+
 //分页条数据模型
 const pageNum = ref(1)//当前页
 const total = ref(20)//总条数
-const pageSize = ref(5)//每页条数
+const pageSize = ref(10)//每页条数
+const size = ref('default')
+const background = ref(false)
+const disabled = ref(false)
 
 //当每页条数发生了变化，调用此函数
 const onSizeChange = (size) => {
@@ -49,7 +56,9 @@ const eventList = async () => {
         pageNum: pageNum.value,
         pageSize: pageSize.value,
         categoryId: categoryId.value ? categoryId.value : null,
-        state: state.value ? state.value : null
+        state: state.value ? state.value : null,
+        startDate: startDate.value ? startDate.value : null,
+        endDate: endDate.value ? endDate.value : null
     }
     let result = await eventListService(params);
 
@@ -86,16 +95,17 @@ const eventModel = ref({
     categoryId: '',
     coverImg: '',
     content: '',
-    state: ''
+    state: '',
+    eventDate: ''
 })
 
 // 设置抽屉表单的校验规则
 const rules = {
-    title: [ { required: true, message: '请输入事件标题', trigger: 'blur' },
-        { min: 1, max: 10, message: '长度为1~10位非空字符', trigger: 'blur' }],
+    title: [{ required: true, message: '请输入事件标题', trigger: 'blur', min: 1, max: 128 },],
     categoryId: [{ required: true, message: '请选择事件分类', trigger: 'change' }],
+    eventDate: [{ required: true, message: '请选择事件时间', trigger: 'change' }],
     coverImg: [{ required: false, message: '请上传事件封面', trigger: 'change' }],
-    content: [{ required: true, message: '请输入事件内容', trigger: 'blur' }]
+    content: [{ required: true, message: '请输入事件内容', trigger: 'blur', min: 1, max: 10000 },]
 }
 
 //导入token
@@ -142,7 +152,7 @@ const clearData = () => {
     if (editorRef.value) {
         editorRef.value.setHTML('');
     }
-
+    eventModel.value.eventDate = '';
 }
 
 //更新事件
@@ -176,23 +186,41 @@ const deleteEvent = async (row) => {
             //刷新列表
             eventList();
         })
-        .catch(() => {
-            ElMessage({
-                type: 'info',
-                message: '用户取消了删除',
-            })
+        .catch((error) => {
+            if(error.msg=='只有事件创建者可以删除事件信息'){
+                // ElMessage({
+                //     type: 'error',
+                //     message: error.msg,
+                // })
+            }
+            else{
+                ElMessage({
+                    type: 'info',
+                    message: '用户取消了删除',
+                })
+            }
         })
 }
 
 //修改事件
 const showDrawer = (row) => {
     visibleDrawer.value = true;
-    eventModel.value.title = row.title;
-    eventModel.value.categoryId = row.categoryId;
-    eventModel.value.coverImg = row.coverImg;
-    eventModel.value.content = row.content;
-    eventModel.value.state = row.state;
-    eventModel.value.id = row.id;
+    eventModel.value = { ...row };
+}
+
+//关闭抽屉->重置状态
+const formRef = ref(null);
+const onDrawerClose = () => {
+    formRef.value.resetFields();
+};
+
+//重置搜索框
+const onReset = () => {
+    categoryId.value = '';
+    state.value = '';
+    startDate.value = '';
+    endDate.value = '';
+    eventList();
 }
 </script>
 <template>
@@ -209,28 +237,50 @@ const showDrawer = (row) => {
         <!-- 搜索表单 -->
         <el-form inline>
             <el-form-item label="事件分类：">
-                <el-select placeholder="请选择" v-model="categoryId" style="width: 240px">
+                <el-select placeholder="请选择" v-model="categoryId" style="width: 120px">
                     <el-option v-for="c in categorys" :key="c.id" :label="c.categoryName" :value="c.id">
                     </el-option>
                 </el-select>
             </el-form-item>
 
             <el-form-item label="完成状态：">
-                <el-select placeholder="请选择" v-model="state" style="width: 240px">
+                <el-select placeholder="请选择" v-model="state" style="width: 120px">
                     <el-option label="完成" value="完成"></el-option>
                     <el-option label="未完成" value="未完成"></el-option>
                 </el-select>
             </el-form-item>
+            <el-form-item label="开始日期">
+                <el-date-picker
+                    v-model="startDate"
+                    type="date"
+                    placeholder="选择开始日期"
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                    clearable
+                />
+            </el-form-item>
+
+            <el-form-item label="结束日期">
+                <el-date-picker
+                    v-model="endDate"
+                    type="date"
+                    placeholder="选择结束日期"
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                    clearable
+                />
+            </el-form-item>
             <el-form-item>
-                <el-button type="primary" @click="eventList">搜索</el-button>
-                <el-button @click="categoryId = ''; state = '';eventList()">重置</el-button>
+                <el-button type="primary" @click="eventList()">搜索</el-button>
+                <el-button @click="onReset()">重置</el-button>
             </el-form-item>
         </el-form>
         <!-- 事件列表 -->
         <el-table :data="events" style="width: 100%">
             <el-table-column label="事件标题" width="400" prop="title"></el-table-column>
             <el-table-column label="分类" prop="categoryName"></el-table-column>
-            <el-table-column label="发生时间" prop="createTime"> </el-table-column>
+            <el-table-column label="事件日期" prop="eventDate"> </el-table-column>
+            <el-table-column label="记录时间" prop="createTime"> </el-table-column>
             <el-table-column label="状态" prop="state"></el-table-column>
             <el-table-column label="操作" width="100">
                 <template #default="{ row }">
@@ -244,14 +294,26 @@ const showDrawer = (row) => {
             </template>
         </el-table>
         <!-- 分页条 -->
-        <el-pagination v-model:current-page="pageNum" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]"
+        <!-- <el-pagination v-model:current-page="pageNum" v-model:page-size="pageSize" :page-sizes="[5, 10, 15]"
             layout="jumper, total, sizes, prev, pager, next" background :total="total" @size-change="onSizeChange"
-            @current-change="onCurrentChange" style="margin-top: 20px; justify-content: flex-end" />
-
+            @current-change="onCurrentChange" style="margin-top: 20px; justify-content: flex-end" /> -->
+        <el-pagination
+        v-model:current-page="pageNum"
+        v-model:page-size="pageSize"
+        :page-sizes="[10,20,30]"
+        :size="size"
+        :disabled="disabled"
+        :background="background"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        @size-change="onSizeChange"
+        @current-change="onCurrentChange"
+        style="margin-top: 20px; justify-content: flex-end"
+        />
         <!-- 抽屉 -->
-        <el-drawer v-model="visibleDrawer" :title="title" direction="rtl" size="50%">
+        <el-drawer v-model="visibleDrawer" :title="title" direction="rtl" size="60%" @close="onDrawerClose">
             <!-- 添加事件表单 -->
-            <el-form :model="eventModel" :rules="rules" label-width="100px">
+            <el-form ref="formRef" :model="eventModel" :rules="rules" label-width="100px">
                 <el-form-item label="事件标题" prop="title">
                     <el-input v-model="eventModel.title" placeholder="请输入标题"></el-input>
                 </el-form-item>
@@ -261,6 +323,18 @@ const showDrawer = (row) => {
                         </el-option>
                     </el-select>
                 </el-form-item>
+
+                <el-form-item label="事件时间" prop="eventDate">
+                    <el-date-picker
+                        v-model="eventModel.eventDate"
+                        type="date"
+                        placeholder="选择事件日期"
+                        format="YYYY-MM-DD"
+                        value-format="YYYY-MM-DD"
+                        style="width: 100%;"
+                    />
+                </el-form-item>
+
                 <el-form-item label="事件封面" prop="coverImg" >
 
                     <!-- 

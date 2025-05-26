@@ -42,7 +42,8 @@ import { userRegisterService, userLoginService} from '@/api/user.js'
 const register = async () => {
     //registerData是一个响应式对象,如果要获取值,需要.value
     let result = await userRegisterService(registerData.value);
-    ElMessage.success('注册成功')
+    ElMessage.success('注册成功');
+    isRegister.value=false;
 }
 
 //绑定数据,复用注册表单的数据模型

@@ -24,10 +24,10 @@ const categoryModel = ref({
 //添加分类表单校验
 const rules = {
     categoryName: [
-        { required: true, message: '请输入分类名称', trigger: 'blur' },
+        { required: true, message: '请输入分类名称', trigger: 'blur', min: 1, max: 32 },
     ],
     categoryAlias: [
-        { required: true, message: '请输入分类别名', trigger: 'blur' },
+        { required: true, message: '请输入分类别名', trigger: 'blur', min: 1, max: 32 },
     ]
 }
 
@@ -101,13 +101,27 @@ const deleteCategory = (row) => {
             //刷新列表
             eventCategoryList();
         })
-        .catch(() => {
-            ElMessage({
-                type: 'info',
-                message: '用户取消了删除',
-            })
+        .catch((error) => {
+            if(error.msg=='只有分类创建者可删除分类信息'){
+                // ElMessage({
+                //     type: 'error',
+                //     message: error.msg,
+                // })
+            }
+            else{
+                ElMessage({
+                    type: 'info',
+                    message: '用户取消了删除',
+                })
+            }
         })
 }
+
+//关闭弹窗->重置状态
+const formRef = ref(null);
+const onDialogClose = () => {
+    formRef.value.resetFields();
+};
 </script>
 <template>
     <el-card class="page-container">
@@ -135,13 +149,13 @@ const deleteCategory = (row) => {
         </el-table>
 
         <!-- 添加分类弹窗 -->
-        <el-dialog v-model="dialogVisible" :title="title" width="30%">
-            <el-form :model="categoryModel" :rules="rules" label-width="100px" style="padding-right: 30px">
+        <el-dialog v-model="dialogVisible" :title="title" width="30%"  @close="onDialogClose">
+            <el-form ref="formRef" :model="categoryModel" :rules="rules" label-width="100px" style="padding-right: 30px">
                 <el-form-item label="分类名称" prop="categoryName">
-                    <el-input v-model="categoryModel.categoryName" minlength="1" maxlength="10"></el-input>
+                    <el-input v-model="categoryModel.categoryName" minlength="1" maxlength="32"></el-input>
                 </el-form-item>
                 <el-form-item label="分类别名" prop="categoryAlias">
-                    <el-input v-model="categoryModel.categoryAlias" minlength="1" maxlength="15"></el-input>
+                    <el-input v-model="categoryModel.categoryAlias" minlength="1" maxlength="32"></el-input>
                 </el-form-item>
             </el-form>
             <template #footer>
