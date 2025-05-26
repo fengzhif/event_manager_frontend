@@ -42,7 +42,7 @@ instance.interceptors.response.use(
 
         //操作失败
         //alert(result.data.msg?result.data.msg:'服务异常')
-        ElMessage.error(result.data.msg && result.data.msg.length < 100 ? result.data.msg : '服务异常')
+        ElMessage.error(result.data.msg && result.data.msg.length < 100 ? result.data.msg : '请确保必选项都正确输入')
         //异步操作的状态转换为失败
         return Promise.reject(result.data)
         

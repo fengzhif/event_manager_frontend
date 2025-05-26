@@ -25,6 +25,7 @@
     }
 
     getUserInfo();
+    console.log(userInfoStore.info.userPicUrl)
     //条目被点击后,调用的函数
     import {useRouter} from 'vue-router'
     const router = useRouter();

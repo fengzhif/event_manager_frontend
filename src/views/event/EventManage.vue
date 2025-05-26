@@ -89,6 +89,14 @@ const eventModel = ref({
     state: ''
 })
 
+// 设置抽屉表单的校验规则
+const rules = {
+    title: [ { required: true, message: '请输入事件标题', trigger: 'blur' },
+        { min: 1, max: 10, message: '长度为1~10位非空字符', trigger: 'blur' }],
+    categoryId: [{ required: true, message: '请选择事件分类', trigger: 'change' }],
+    coverImg: [{ required: false, message: '请上传事件封面', trigger: 'change' }],
+    content: [{ required: true, message: '请输入事件内容', trigger: 'blur' }]
+}
 
 //导入token
 import { useTokenStore } from '@/stores/token.js';
@@ -243,17 +251,17 @@ const showDrawer = (row) => {
         <!-- 抽屉 -->
         <el-drawer v-model="visibleDrawer" :title="title" direction="rtl" size="50%">
             <!-- 添加事件表单 -->
-            <el-form :model="eventModel" label-width="100px">
-                <el-form-item label="事件标题">
+            <el-form :model="eventModel" :rules="rules" label-width="100px">
+                <el-form-item label="事件标题" prop="title">
                     <el-input v-model="eventModel.title" placeholder="请输入标题"></el-input>
                 </el-form-item>
-                <el-form-item label="事件分类">
+                <el-form-item label="事件分类" prop="categoryId">
                     <el-select placeholder="请选择" v-model="eventModel.categoryId">
                         <el-option v-for="c in categorys" :key="c.id" :label="c.categoryName" :value="c.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="事件封面">
+                <el-form-item label="事件封面" prop="coverImg" >
 
                     <!-- 
                         auto-upload:设置是否自动上传
@@ -271,7 +279,7 @@ const showDrawer = (row) => {
                         </el-icon>
                     </el-upload>
                 </el-form-item>
-                <el-form-item label="事件内容">
+                <el-form-item label="事件内容" prop="content">
                     <div class="editor">
                         <quill-editor ref="editorRef" theme="snow" v-model:content="eventModel.content"
                             contentType="html">

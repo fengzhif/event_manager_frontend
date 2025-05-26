@@ -32,7 +32,7 @@ const updateAvatar = async ()=>{
     ElMessage.success('修改成功')
 
     //修改pinia中的数据
-    userInfoStore.info.userPic = imgUrl.value
+    userInfoStore.info.userPicUrl = imgUrl.value
 }
 </script>
 
