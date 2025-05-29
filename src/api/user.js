@@ -42,3 +42,13 @@ export const userAvatarUpdateService = (avatarUrl)=>{
 export const userUpdatePwdService=(userPwd)=>{
     return request.patch('/user/updatePwd',userPwd)
 }
+
+//忘记密码
+export const userForgotPassword=(username)=>{
+    return request.post('/user/forgotPassword?username='+username);
+}
+
+//忘记密码->重置密码
+export const userResetPassword=(resetDate)=>{
+    return request.patch('/user/resetPassword',resetDate)
+}
